@@ -24,7 +24,6 @@ dependencies {
     implementation(compose.foundation)
     implementation(compose.material)
     implementation("org.jetbrains.kotlinx:kotlinx-datetime:0.4.1")
-    implementation("io.coil-kt:coil-compose:2.5.0")
 
 }
 
