@@ -1,6 +1,5 @@
 package vistas
 
-
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -28,8 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import kotlinx.coroutines.flow.asFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
+
 import java.io.File
 
 
@@ -220,7 +219,7 @@ fun KeyboardArrowDown() {
 fun IconMoon() {
 
     AsyncImage(
-        load = { loadImageBitmap(File("C:\\Users\\Postlify\\Downloads\\moon.png")) },
+        load = { loadImageBitmap(File("moon.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Sample",
     )
@@ -230,7 +229,7 @@ fun IconMoon() {
 @Composable
 fun IconEdit() {
     AsyncImage(
-        load = { loadImageBitmap(File("C:\\Users\\Postlify\\Downloads\\edit.png")) },
+        load = { loadImageBitmap(File("edit.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "edit",
     )
@@ -239,7 +238,7 @@ fun IconEdit() {
 @Composable
 fun IconDelete() {
     AsyncImage(
-        load = { loadImageBitmap(File("C:\\Users\\Postlify\\Downloads\\delete.png")) },
+        load = { loadImageBitmap(File("delete.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Delete",
     )
@@ -248,7 +247,7 @@ fun IconDelete() {
 @Composable
 fun ImageEmpty() {
     AsyncImage(
-        load = { loadImageBitmap(File("C:\\Users\\Postlify\\Downloads\\detective.png")) },
+        load = { loadImageBitmap(File("detective.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Sample",
         modifier = Modifier
@@ -299,9 +298,7 @@ fun AddNote(notes: List<Notes>) {
 @Composable
 fun MainScreen() {
 
-    val notes = remember {
-        mutableStateOf<List<Notes>>(NoteRepository.notes)
-    }
+    val notes = NoteRepository.notes.collectAsState()
     Column(
         modifier = Modifier.padding(60.dp),
 
