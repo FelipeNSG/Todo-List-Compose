@@ -1,19 +1,51 @@
 package vistas
 
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
+import java.util.*
 
-class Notes(val text:String){}
+class Notes(var text: String, val idValue: String = UUID.randomUUID().toString()) {}
 
-object NoteRepository{
+object NoteRepository {
 
-    private val _notes = MutableStateFlow(listOf(Notes("Hello"), Notes("Hola"), Notes("QUE TAL")))
-    val notes: StateFlow<List<Notes>> = _notes.asStateFlow()
+    val scope = CoroutineScope(Dispatchers.IO)
+
+    var cache = listOf<Notes>()
+    private val _notes = MutableSharedFlow<List<Notes>>()
+    val notes: Flow<List<Notes>> = _notes
 
     fun addNote(notes: Notes) {
-        val current =  _notes.value.toMutableList()
+        val current = cache.toMutableList()
         current.add(notes)
-        _notes.value = current
+        cache = current.toList()
+        updateFlow()
     }
+
+    fun deleteNote(textNote: String, id: String, index: Int) {
+        val current = cache.toMutableList()
+        current.removeAt(index)
+        cache = current.toList()
+        updateFlow()
+    }
+
+    fun editNote(index: Int, text: String) {
+        val current = cache.toMutableList()
+        current[index].text = text
+        cache = current.toMutableList()
+        updateFlow()
+    }
+
+
+    fun updateFlow () {
+
+        scope.launch { _notes.emit(cache.toMutableList()) }
+
+    }
+
 }
+
 
 

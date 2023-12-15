@@ -3,6 +3,7 @@ package vistas
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -11,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.*
@@ -30,7 +32,6 @@ import androidx.compose.ui.window.application
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import java.io.File
-
 
 @Composable
 fun Title() {
@@ -96,12 +97,24 @@ fun ButtonFilter(modifier: Modifier) {
 
 @Composable
 fun ButtonTheme(modifier: Modifier) {
+    val changeMode = remember {
+        mutableStateOf(false)
+    }
     Button(
-        onClick = {},
+        onClick = {
+            changeMode.value = !changeMode.value
+        },
         modifier.width(50.dp)
             .height(54.dp)
     ) {
-        IconMoon()
+
+        if (changeMode.value) {
+            IconSun()
+        } else {
+            IconMoon()
+        }
+
+
     }
 }
 
@@ -219,7 +232,7 @@ fun KeyboardArrowDown() {
 fun IconMoon() {
 
     AsyncImage(
-        load = { loadImageBitmap(File("moon.png")) },
+        load = { loadImageBitmap(File("src/main/resources/moon.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Sample",
     )
@@ -227,27 +240,121 @@ fun IconMoon() {
 }
 
 @Composable
+fun IconSun() {
+
+    AsyncImage(
+        load = { loadImageBitmap(File("src/main/resources/sun.png")) },
+        painterFor = { remember { BitmapPainter(it) } },
+        contentDescription = "Sun",
+    )
+
+}
+
+@Composable
 fun IconEdit() {
     AsyncImage(
-        load = { loadImageBitmap(File("edit.png")) },
+        load = { loadImageBitmap(File("src/main/resources/edit.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "edit",
     )
 }
 
 @Composable
+fun ButtonEdit(index: Int) {
+    var text by rememberSaveable { mutableStateOf("") }
+    val openDialog = remember {
+        mutableStateOf(false)
+    }
+
+    IconButton(onClick = {
+        openDialog.value = true
+    })
+
+    {
+        IconEdit()
+    }
+
+    if (openDialog.value) {
+
+        AlertDialog(
+            onDismissRequest = { openDialog.value = false },
+            title = {
+
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(text = "EDIT NOTE")
+                }
+
+            },
+            text = {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    TextField(
+                        value = text,
+                        onValueChange = { text = it },
+                        modifier = Modifier.width(400.dp)
+                    )
+                }
+            },
+
+            dismissButton = {
+                Button(
+                    onClick = { openDialog.value = false },
+                    modifier = Modifier.padding(end = 220.dp, top = 100.dp)
+
+                ) {
+                    Text(text = "CANCEL")
+                }
+            },
+
+            confirmButton = {
+                Button(
+                    onClick = {
+                        NoteRepository.editNote(index, text)
+                        openDialog.value = false
+
+
+                    },
+                    modifier = Modifier.padding(end = 82.dp, top = 100.dp)
+                ) {
+                    Text(text = "APPLY")
+                }
+            },
+        )
+
+    }
+
+
+}
+
+@Composable
 fun IconDelete() {
     AsyncImage(
-        load = { loadImageBitmap(File("delete.png")) },
+        load = { loadImageBitmap(File("src/main/resources/delete.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Delete",
     )
 }
 
 @Composable
+fun ButtonDelete(textNote: String, id: String, index: Int) {
+    IconButton(onClick = {
+        NoteRepository.deleteNote(textNote, id, index)
+
+    }) {
+        IconDelete()
+    }
+}
+
+
+@Composable
 fun ImageEmpty() {
     AsyncImage(
-        load = { loadImageBitmap(File("detective.png")) },
+        load = { loadImageBitmap(File("src/main/resources/detective.png")) },
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Sample",
         modifier = Modifier
@@ -259,7 +366,7 @@ fun ImageEmpty() {
 
 
 @Composable
-fun CreateNote(note: Notes) {
+fun CreateNote(note: Notes, index: Int) {
     val checked = remember { mutableStateOf(false) }
 
     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -274,8 +381,32 @@ fun CreateNote(note: Notes) {
             Text("${note.text} ")
         }
 
-        IconEdit()
-        IconDelete()
+        ButtonEdit(index)
+        ButtonDelete(note.text, note.idValue, index)
+
+    }
+}
+
+
+@Composable
+fun CreateEditNote(note: Notes, index: Int) {
+    val checked = remember { mutableStateOf(false) }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+
+        Checkbox(
+            checked = checked.value,
+            onCheckedChange = { isChecked -> checked.value = isChecked },
+        )
+        if (checked.value) {
+            Text("${note.text} ", textDecoration = TextDecoration.LineThrough)
+        } else {
+            Text("${note.text} ")
+        }
+
+        ButtonEdit(index)
+        ButtonDelete(note.text, note.idValue, index)
+
     }
 }
 
@@ -287,18 +418,23 @@ fun AddNote(notes: List<Notes>) {
 
     )
     {
-        items(notes) {
-            CreateNote(it)
+        items(notes.size) {
+            CreateNote(notes[it], it)
         }
+
+
     }
 }
+
 
 //Logic Code
 
 @Composable
 fun MainScreen() {
 
-    val notes = NoteRepository.notes.collectAsState()
+    val notes = NoteRepository.notes.collectAsState(
+        emptyList()
+    )
     Column(
         modifier = Modifier.padding(60.dp),
 
@@ -321,6 +457,5 @@ fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
         MainScreen()
     }
-
 }
 
