@@ -3,30 +3,31 @@ package vistas
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-import kotlinx.coroutines.flow.MutableStateFlow
 
 import java.io.File
 
@@ -38,8 +39,12 @@ fun Title() {
         text = "TODO LIST",
         modifier = Modifier.fillMaxWidth(),
         fontSize = 30.sp,
-        textAlign = TextAlign.Center
-
+        textAlign = TextAlign.Center,
+        color = if (!JetRedditThemeSettings.isInDarkTheme.value){
+            Color.Black
+        } else{
+            Color.White
+        }
     )
 }
 
@@ -52,7 +57,12 @@ fun TitleEmpty() {
         fontSize = 20.sp,
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
-        textAlign = TextAlign.Center
+        textAlign = TextAlign.Center,
+        color = if (!JetRedditThemeSettings.isInDarkTheme.value){
+            Color.Black
+        } else{
+            Color.White
+        }
     )
 }
 
@@ -68,14 +78,24 @@ fun SearchBar() {
         )
     {
         var text by rememberSaveable { mutableStateOf("") }
-        TextField(
+        OutlinedTextField(
             value = text,
             onValueChange = { text = it },
             placeholder = { Text(text = "Search note...") },
             trailingIcon = { Lens() },
-            modifier = Modifier.width(700.dp)
-                .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
-                .background(Color.White)
+            shape = RoundedCornerShape(10.dp),
+            modifier = Modifier.width(700.dp),
+            colors = if (!JetRedditThemeSettings.isInDarkTheme.value){
+                TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.primary,
+                    unfocusedBorderColor = MaterialTheme.colors.primary,
+                )
+            } else {
+                TextFieldDefaults.outlinedTextFieldColors(
+                    focusedBorderColor = MaterialTheme.colors.onPrimary,
+                    unfocusedBorderColor = MaterialTheme.colors.onPrimary,
+                )
+            }
         )
 
         Row()
@@ -134,9 +154,17 @@ fun ButtonTheme(modifier: Modifier) {
     ) {
 
         if (changeMode.value) {
-            IconSun()
+            Icon(
+                imageVector = Icons.Outlined.WbSunny,
+                contentDescription = null,
+                tint = Color.White,
+            )
         } else {
-            IconMoon()
+            Icon(
+                imageVector = Icons.Default.Bedtime,
+                contentDescription = null,
+                tint = Color.White,
+            )
         }
     }
 
@@ -162,12 +190,12 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
     )
     {
         IconButton(
-
             onClick = { openDialog.value = true },
             modifier = Modifier
+                .clip(CircleShape)
+                .background(MaterialTheme.colors.primary)
                 .size(50.dp)
-                .border(0.dp, Color.Magenta, shape = CircleShape)
-                .background(color = Color.Magenta, shape = CircleShape)
+
 
         ) {
             Icon(Icons.Default.Add, contentDescription = "content description", tint = Color.White)
@@ -184,23 +212,29 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     Text(text = "NEW NOTE")
-
                 }
-
             },
             text = {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    TextField(
+                    OutlinedTextField(
                         value = text,
                         placeholder = { Text("Input your note...") },
                         onValueChange = { text = it },
-                        modifier = Modifier.width(400.dp)
-                            .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
-
-
+                        modifier = Modifier.width(400.dp),
+                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value){
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MaterialTheme.colors.primary,
+                                unfocusedBorderColor = MaterialTheme.colors.primary,
+                            )
+                        } else {
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MaterialTheme.colors.onPrimary,
+                                unfocusedBorderColor = MaterialTheme.colors.onPrimary,
+                            )
+                        }
                     )
                 }
             },
@@ -240,7 +274,7 @@ fun Lens() {
     Icon(
         imageVector = Icons.Default.Search,
         contentDescription = null,
-        tint = Color.Black,
+        tint = MaterialTheme.colors.primary,
     )
 
 }
@@ -333,11 +367,22 @@ fun ButtonEdit(index: Int) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    TextField(
+                    OutlinedTextField(
                         value = text,
                         onValueChange = { text = it },
-                        modifier = Modifier.width(400.dp)
-                            .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
+                        modifier = Modifier.width(400.dp),
+                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value){
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MaterialTheme.colors.primary,
+                                unfocusedBorderColor = MaterialTheme.colors.primary,
+                            )
+                        } else {
+                            TextFieldDefaults.outlinedTextFieldColors(
+                                focusedBorderColor = MaterialTheme.colors.onPrimary,
+                                unfocusedBorderColor = MaterialTheme.colors.onPrimary,
+                            )
+                        }
+
                     )
                 }
             },
@@ -357,7 +402,6 @@ fun ButtonEdit(index: Int) {
                     onClick = {
                         NoteRepository.editNote(index, text)
                         openDialog.value = false
-
 
                     },
                     modifier = Modifier.padding(end = 82.dp, top = 100.dp)
@@ -389,7 +433,6 @@ fun ButtonDelete(textNote: String, id: String, index: Int) {
     }
 }
 
-
 @Composable
 fun ImageEmpty() {
     AsyncImage(
@@ -403,7 +446,6 @@ fun ImageEmpty() {
     )
 }
 
-
 @Composable
 fun CreateNote(note: Notes, index: Int) {
     val checked = remember { mutableStateOf(false) }
@@ -415,9 +457,9 @@ fun CreateNote(note: Notes, index: Int) {
             onCheckedChange = { isChecked -> checked.value = isChecked },
         )
         if (checked.value) {
-            Text("${note.text} ", textDecoration = TextDecoration.LineThrough)
+            Text("${note.text} ", textDecoration = TextDecoration.LineThrough, color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.SemiBold)
         } else {
-            Text("${note.text} ")
+            Text("${note.text} ", color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.SemiBold)
         }
 
         ButtonEdit(index)
@@ -425,7 +467,6 @@ fun CreateNote(note: Notes, index: Int) {
 
     }
 }
-
 
 @Composable
 fun CreateEditNote(note: Notes, index: Int) {
@@ -438,7 +479,7 @@ fun CreateEditNote(note: Notes, index: Int) {
             onCheckedChange = { isChecked -> checked.value = isChecked },
         )
         if (checked.value) {
-            Text("${note.text} ", textDecoration = TextDecoration.LineThrough)
+            Text("${note.text} ", textDecoration = TextDecoration.LineThrough, )
         } else {
             Text("${note.text} ")
         }
@@ -461,13 +502,11 @@ fun AddNote(notes: List<Notes>) {
             CreateNote(notes[it], it)
         }
 
-
     }
 }
 
-
 //Logic Code
-
+@Preview
 @Composable
 fun MainScreen() {
 
@@ -476,9 +515,9 @@ fun MainScreen() {
     )
     ToDoListTheme {
         Column(
-            modifier = Modifier.padding(60.dp),
-
-            ) {
+            modifier = Modifier.background(MaterialTheme.colors.background),
+        ) {
+            Spacer(Modifier.height(60.dp))
             Title()
             SearchBar()
             if (notes.value.isEmpty()) {
@@ -495,8 +534,11 @@ fun MainScreen() {
 }
 
 fun main() = application {
-    Window(onCloseRequest = ::exitApplication) {
+    Window(
+        onCloseRequest = ::exitApplication, state = WindowState(
+            size = DpSize(1920.dp, 1080.dp)
+        )
+    ) {
         MainScreen()
     }
 }
-

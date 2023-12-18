@@ -7,41 +7,36 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import java.util.*
 
-class Notes(var text: String, val idValue: String = UUID.randomUUID().toString()) {}
+data class Notes(var text: String, val idValue: String = UUID.randomUUID().toString())
 
 object NoteRepository {
 
     val scope = CoroutineScope(Dispatchers.IO)
 
-    var cache = mutableListOf<Notes>()
+    private var cache = mutableListOf<Notes>()
     private val _notes = MutableSharedFlow<List<Notes>>()
     val notes: Flow<List<Notes>> = _notes
 
     fun addNote(notes: Notes) {
-        val current = cache.toMutableList()
-        current.add(notes)
-        cache = current.toMutableList()
+        cache.add(notes)
         updateFlow()
     }
 
     fun deleteNote(textNote: String, id: String, index: Int) {
-        val current = cache.toMutableList()
-        current.removeAt(index)
-        cache = current.toMutableList()
+        cache.removeAt(index)
         updateFlow()
     }
 
     fun editNote(index: Int, text: String) {
-        val current = cache.toMutableList()
-        current[index].text = text
-        cache = current.toMutableList()
+        cache[index] = cache[index].copy(text = text)
         updateFlow()
     }
 
-
     fun updateFlow () {
 
-        scope.launch { _notes.emit(cache.toMutableList()) }
+        scope.launch {
+            _notes.emit(cache.toList())
+        }
 
     }
 

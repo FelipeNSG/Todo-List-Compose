@@ -7,35 +7,35 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.Color
 
 val DarkColors = Colors(
-    primary = Color(0xFF6200EE),
-    primaryVariant = Color(0xFF3700B3),
-    secondary = Color(0xFF03DAC6),
-    secondaryVariant = Color.Unspecified,
-    background = Color.Unspecified,
-    surface = Color.White, //Color of de alert screen window
-    error = Color.Unspecified,
-    onPrimary = Color.White, //Color of text the buttons
-    onSecondary = Color.Black, //Color of the text Alert Screen
-    onBackground = Color.Black,
-    onSurface = Color.Black, //Component searchBar
-    onError = Color.Unspecified,
-    isLight = false
+    primary = md_theme_dark_primary,
+    onPrimary = Color.White,
+    secondary = md_theme_dark_secondary,
+    onSecondary = md_theme_dark_onSecondary,
+    error = md_theme_dark_error,
+    onError = md_theme_dark_onError,
+    background = md_theme_dark_background,
+    onBackground = Color.White,
+    surface = md_theme_dark_surface,
+    onSurface = md_theme_dark_onSurface,
+    isLight = false,
+    primaryVariant = md_theme_dark_primary,
+    secondaryVariant = md_theme_dark_secondary
 )
 
 val LightColors = Colors(
-    primary = Color(0xFF6200EE), //color of the buttons
-    primaryVariant = Color.Yellow,
-    secondary = Color.Red,
-    secondaryVariant = Color.White,
-    background = Color.Unspecified,
-    surface = Color.White, //Color of de alert screen window
-    error = Color.Unspecified,
-    onPrimary = Color.White, //Color of text the buttons
-    onSecondary = Color.Black, //Color of the text Alert Screen
-    onBackground = Color.Blue,
-    onSurface = Color.Unspecified, //Component searchBar
-    onError = Color.White,
-    isLight = true
+    primary = md_theme_light_primary, // Color buttons
+    onPrimary = Color.White, //color of letters buttons
+    secondary = md_theme_light_secondary,
+    onSecondary = md_theme_light_onSecondary,
+    error = md_theme_light_error,
+    onError = md_theme_light_onError,
+    background = Color.White, //Color all elements background
+    onBackground = Color.Black, //Color text alert dialog
+    surface = Color.White, //color window alert dialog
+    onSurface = Color.Unspecified, //color search bar and text
+    isLight = true,
+    primaryVariant = md_theme_light_primary,
+    secondaryVariant = md_theme_light_secondary
 )
 
 @Composable
