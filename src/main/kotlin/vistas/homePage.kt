@@ -74,8 +74,9 @@ fun SearchBar() {
             placeholder = { Text(text = "Search note...") },
             trailingIcon = { Lens() },
             modifier = Modifier.width(700.dp)
-                    .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
-            )
+                .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
+                .background(Color.White)
+        )
 
         Row()
         {
