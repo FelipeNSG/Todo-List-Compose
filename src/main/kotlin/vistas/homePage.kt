@@ -11,10 +11,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -32,6 +29,7 @@ import androidx.compose.ui.window.application
 import kotlinx.coroutines.flow.MutableStateFlow
 
 import java.io.File
+
 
 @Composable
 fun Title() {
@@ -55,12 +53,13 @@ fun TitleEmpty() {
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center
-
     )
 }
 
 @Composable
 fun SearchBar() {
+
+    var optionsList by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth(),
@@ -72,27 +71,50 @@ fun SearchBar() {
         TextField(
             value = text,
             onValueChange = { text = it },
+            placeholder = { Text(text = "Search note...") },
             trailingIcon = { Lens() },
             modifier = Modifier.width(700.dp)
-                .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp)),
-
-
+                    .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
             )
-        ButtonFilter(Modifier.padding(start = 4.dp))
+
+        Row()
+        {
+            DropdownMenu(
+                expanded = optionsList,
+                onDismissRequest = { optionsList = false }, modifier = Modifier.width(115.dp)
+            ) {
+                DropdownMenuItem(onClick = {}) {
+                    Text("ALL")
+                }
+                DropdownMenuItem(onClick = {}) {
+                    Text("Complete")
+                }
+                DropdownMenuItem(onClick = {}) {
+                    Text("Incomplete")
+                }
+            }
+        }
+
+        //Button Filter
+        Button(
+            onClick = { optionsList = !optionsList },
+            modifier = Modifier.height(54.dp)
+                .width(110.dp)
+                .padding(start = 4.dp)
+
+        ) {
+            Text(text = "ALL")
+            if (!optionsList) {
+                KeyboardArrowDown()
+            } else {
+                KeyBoardArrowUp()
+            }
+
+        }
+
         ButtonTheme(Modifier.padding(start = 4.dp))
     }
-}
 
-@Composable
-fun ButtonFilter(modifier: Modifier) {
-    Button(
-        onClick = {},
-        modifier.height(54.dp)
-
-    ) {
-        Text(text = "ALL")
-        KeyboardArrowDown()
-    }
 }
 
 @Composable
@@ -103,6 +125,8 @@ fun ButtonTheme(modifier: Modifier) {
     Button(
         onClick = {
             changeMode.value = !changeMode.value
+            JetRedditThemeSettings.isInDarkTheme.value = !JetRedditThemeSettings.isInDarkTheme.value
+
         },
         modifier.width(50.dp)
             .height(54.dp)
@@ -113,9 +137,9 @@ fun ButtonTheme(modifier: Modifier) {
         } else {
             IconMoon()
         }
-
-
     }
+
+
 }
 
 
@@ -133,7 +157,6 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
     Row(
         modifier = Modifier.fillMaxSize()
             .padding(start = 1250.dp, top = 300.dp)
-
 
     )
     {
@@ -171,8 +194,10 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
                 ) {
                     TextField(
                         value = text,
+                        placeholder = { Text("Input your note...") },
                         onValueChange = { text = it },
                         modifier = Modifier.width(400.dp)
+                            .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
 
 
                     )
@@ -221,11 +246,24 @@ fun Lens() {
 
 @Composable
 fun KeyboardArrowDown() {
+
     Icon(
         imageVector = Icons.Default.KeyboardArrowDown,
         contentDescription = null,
         tint = Color.White
     )
+
+}
+
+@Composable
+fun KeyBoardArrowUp() {
+
+    Icon(
+        imageVector = Icons.Default.KeyboardArrowUp,
+        contentDescription = null,
+        tint = Color.White
+    )
+
 }
 
 @Composable
@@ -261,6 +299,7 @@ fun IconEdit() {
 
 @Composable
 fun ButtonEdit(index: Int) {
+
     var text by rememberSaveable { mutableStateOf("") }
     val openDialog = remember {
         mutableStateOf(false)
@@ -297,6 +336,7 @@ fun ButtonEdit(index: Int) {
                         value = text,
                         onValueChange = { text = it },
                         modifier = Modifier.width(400.dp)
+                            .border(width = 0.5.dp, color = Color.Black, shape = RoundedCornerShape(10.dp))
                     )
                 }
             },
@@ -327,8 +367,6 @@ fun ButtonEdit(index: Int) {
         )
 
     }
-
-
 }
 
 @Composable
@@ -435,20 +473,22 @@ fun MainScreen() {
     val notes = NoteRepository.notes.collectAsState(
         emptyList()
     )
-    Column(
-        modifier = Modifier.padding(60.dp),
+    ToDoListTheme {
+        Column(
+            modifier = Modifier.padding(60.dp),
 
-        ) {
-        Title()
-        SearchBar()
-        if (notes.value.isEmpty()) {
-            ImageEmpty()
-            TitleEmpty()
-        } else {
-            AddNote(notes.value)
-        }
-        ButtonAdd {
+            ) {
+            Title()
+            SearchBar()
+            if (notes.value.isEmpty()) {
+                ImageEmpty()
+                TitleEmpty()
+            } else {
+                AddNote(notes.value)
+            }
+            ButtonAdd {
 
+            }
         }
     }
 }
