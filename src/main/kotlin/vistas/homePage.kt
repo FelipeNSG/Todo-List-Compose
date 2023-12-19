@@ -2,7 +2,6 @@ package vistas
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
@@ -20,14 +19,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
+
 
 import java.io.File
 
@@ -40,9 +42,9 @@ fun Title() {
         modifier = Modifier.fillMaxWidth(),
         fontSize = 30.sp,
         textAlign = TextAlign.Center,
-        color = if (!JetRedditThemeSettings.isInDarkTheme.value){
+        color = if (!JetRedditThemeSettings.isInDarkTheme.value) {
             Color.Black
-        } else{
+        } else {
             Color.White
         }
     )
@@ -58,9 +60,9 @@ fun TitleEmpty() {
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center,
-        color = if (!JetRedditThemeSettings.isInDarkTheme.value){
+        color = if (!JetRedditThemeSettings.isInDarkTheme.value) {
             Color.Black
-        } else{
+        } else {
             Color.White
         }
     )
@@ -80,12 +82,15 @@ fun SearchBar() {
         var text by rememberSaveable { mutableStateOf("") }
         OutlinedTextField(
             value = text,
-            onValueChange = { text = it },
+            onValueChange = {
+                text = it
+                NoteRepository.performSearch(it)
+                            },
             placeholder = { Text(text = "Search note...") },
             trailingIcon = { Lens() },
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.width(700.dp),
-            colors = if (!JetRedditThemeSettings.isInDarkTheme.value){
+            colors = if (!JetRedditThemeSettings.isInDarkTheme.value) {
                 TextFieldDefaults.outlinedTextFieldColors(
                     focusedBorderColor = MaterialTheme.colors.primary,
                     unfocusedBorderColor = MaterialTheme.colors.primary,
@@ -104,13 +109,23 @@ fun SearchBar() {
                 expanded = optionsList,
                 onDismissRequest = { optionsList = false }, modifier = Modifier.width(115.dp)
             ) {
-                DropdownMenuItem(onClick = {}) {
+                DropdownMenuItem(onClick = {
+                    NoteRepository.showAll()
+                    optionsList=false
+                }) {
                     Text("ALL")
                 }
-                DropdownMenuItem(onClick = {}) {
+                DropdownMenuItem(onClick = {
+                    NoteRepository.completedTask()
+                    optionsList=false
+
+                }) {
                     Text("Complete")
                 }
-                DropdownMenuItem(onClick = {}) {
+                DropdownMenuItem(onClick = {
+                    NoteRepository.uncompletedTask()
+                    optionsList=false
+                }) {
                     Text("Incomplete")
                 }
             }
@@ -132,10 +147,8 @@ fun SearchBar() {
             }
 
         }
-
         ButtonTheme(Modifier.padding(start = 4.dp))
     }
-
 }
 
 @Composable
@@ -167,8 +180,6 @@ fun ButtonTheme(modifier: Modifier) {
             )
         }
     }
-
-
 }
 
 
@@ -180,9 +191,6 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
         mutableStateOf(false)
     }
 
-    var createNote = remember {
-        mutableStateOf(false)
-    }
     Row(
         modifier = Modifier.fillMaxSize()
             .padding(start = 1250.dp, top = 300.dp)
@@ -195,8 +203,6 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
                 .clip(CircleShape)
                 .background(MaterialTheme.colors.primary)
                 .size(50.dp)
-
-
         ) {
             Icon(Icons.Default.Add, contentDescription = "content description", tint = Color.White)
         }
@@ -224,7 +230,7 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
                         placeholder = { Text("Input your note...") },
                         onValueChange = { text = it },
                         modifier = Modifier.width(400.dp),
-                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value){
+                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value) {
                             TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MaterialTheme.colors.primary,
                                 unfocusedBorderColor = MaterialTheme.colors.primary,
@@ -252,7 +258,7 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
             confirmButton = {
                 Button(
                     onClick = {
-                        NoteRepository.addNote(Notes(text))
+                        NoteRepository.addNote(Notes(text, checkbox = false))
                         onApplyButtonClick(text)
                         openDialog.value = false
                     },
@@ -262,9 +268,7 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
                 }
             },
         )
-
     }
-
 }
 
 //  Icons
@@ -276,7 +280,6 @@ fun Lens() {
         contentDescription = null,
         tint = MaterialTheme.colors.primary,
     )
-
 }
 
 @Composable
@@ -297,28 +300,6 @@ fun KeyBoardArrowUp() {
         imageVector = Icons.Default.KeyboardArrowUp,
         contentDescription = null,
         tint = Color.White
-    )
-
-}
-
-@Composable
-fun IconMoon() {
-
-    AsyncImage(
-        load = { loadImageBitmap(File("src/main/resources/moon.png")) },
-        painterFor = { remember { BitmapPainter(it) } },
-        contentDescription = "Sample",
-    )
-
-}
-
-@Composable
-fun IconSun() {
-
-    AsyncImage(
-        load = { loadImageBitmap(File("src/main/resources/sun.png")) },
-        painterFor = { remember { BitmapPainter(it) } },
-        contentDescription = "Sun",
     )
 
 }
@@ -371,7 +352,7 @@ fun ButtonEdit(index: Int) {
                         value = text,
                         onValueChange = { text = it },
                         modifier = Modifier.width(400.dp),
-                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value){
+                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value) {
                             TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MaterialTheme.colors.primary,
                                 unfocusedBorderColor = MaterialTheme.colors.primary,
@@ -410,7 +391,6 @@ fun ButtonEdit(index: Int) {
                 }
             },
         )
-
     }
 }
 
@@ -424,9 +404,9 @@ fun IconDelete() {
 }
 
 @Composable
-fun ButtonDelete(textNote: String, id: String, index: Int) {
+fun ButtonDelete(textNote: String, index: Int) {
     IconButton(onClick = {
-        NoteRepository.deleteNote(textNote, id, index)
+        NoteRepository.deleteNote(textNote, index)
 
     }) {
         IconDelete()
@@ -448,44 +428,48 @@ fun ImageEmpty() {
 
 @Composable
 fun CreateNote(note: Notes, index: Int) {
-    val checked = remember { mutableStateOf(false) }
 
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row(verticalAlignment = Alignment.CenterVertically,
+    ) {
 
         Checkbox(
-            checked = checked.value,
-            onCheckedChange = { isChecked -> checked.value = isChecked },
+            checked = note.checkbox,
+            onCheckedChange = {
+                NoteRepository.editCheckBox(index,it )
+            },
         )
-        if (checked.value) {
-            Text("${note.text} ", textDecoration = TextDecoration.LineThrough, color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.SemiBold)
+        if (note.checkbox) {
+            Text(
+                "${note.text} ",
+                textDecoration = TextDecoration.LineThrough,
+                color = MaterialTheme.colors.onBackground,
+                fontWeight = FontWeight.SemiBold,
+            )
         } else {
             Text("${note.text} ", color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.SemiBold)
         }
-
         ButtonEdit(index)
-        ButtonDelete(note.text, note.idValue, index)
-
+        ButtonDelete(note.text, index)
     }
 }
 
 @Composable
 fun CreateEditNote(note: Notes, index: Int) {
     val checked = remember { mutableStateOf(false) }
-
-    Row(verticalAlignment = Alignment.CenterVertically) {
+    Row() {
 
         Checkbox(
             checked = checked.value,
             onCheckedChange = { isChecked -> checked.value = isChecked },
         )
         if (checked.value) {
-            Text("${note.text} ", textDecoration = TextDecoration.LineThrough, )
+            Text("${note.text} ", textDecoration = TextDecoration.LineThrough,)
         } else {
             Text("${note.text} ")
         }
 
         ButtonEdit(index)
-        ButtonDelete(note.text, note.idValue, index)
+        ButtonDelete(note.text, index)
 
     }
 }
@@ -494,8 +478,7 @@ fun CreateEditNote(note: Notes, index: Int) {
 fun AddNote(notes: List<Notes>) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth(),
-        horizontalAlignment = Alignment.CenterHorizontally
-
+             horizontalAlignment = Alignment.CenterHorizontally
     )
     {
         items(notes.size) {
@@ -526,9 +509,7 @@ fun MainScreen() {
             } else {
                 AddNote(notes.value)
             }
-            ButtonAdd {
-
-            }
+            ButtonAdd {}
         }
     }
 }
