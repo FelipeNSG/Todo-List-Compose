@@ -9,6 +9,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.Delete
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.WbSunny
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -17,20 +19,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.WindowState
 import androidx.compose.ui.window.application
-
-
 import java.io.File
 
 
@@ -55,7 +54,8 @@ fun TitleEmpty() {
     Alignment.Center
     Text(
         text = "Empty...",
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth()
+            .height(35.dp),
         fontSize = 20.sp,
         fontStyle = FontStyle.Italic,
         fontWeight = FontWeight.SemiBold,
@@ -71,6 +71,7 @@ fun TitleEmpty() {
 @Composable
 fun SearchBar() {
 
+
     var optionsList by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -79,13 +80,14 @@ fun SearchBar() {
 
         )
     {
+        var textButton by rememberSaveable { mutableStateOf("ALL") }
         var text by rememberSaveable { mutableStateOf("") }
         OutlinedTextField(
             value = text,
             onValueChange = {
                 text = it
                 NoteRepository.performSearch(it)
-                            },
+            },
             placeholder = { Text(text = "Search note...") },
             trailingIcon = { Lens() },
             shape = RoundedCornerShape(10.dp),
@@ -111,20 +113,23 @@ fun SearchBar() {
             ) {
                 DropdownMenuItem(onClick = {
                     NoteRepository.showAll()
-                    optionsList=false
+                    optionsList = false
+                    textButton="ALL"
                 }) {
                     Text("ALL")
                 }
                 DropdownMenuItem(onClick = {
                     NoteRepository.completedTask()
-                    optionsList=false
+                    optionsList = false
+                    textButton="Complete"
 
                 }) {
                     Text("Complete")
                 }
                 DropdownMenuItem(onClick = {
                     NoteRepository.uncompletedTask()
-                    optionsList=false
+                    optionsList = false
+                    textButton="Incomplete"
                 }) {
                     Text("Incomplete")
                 }
@@ -135,11 +140,11 @@ fun SearchBar() {
         Button(
             onClick = { optionsList = !optionsList },
             modifier = Modifier.height(54.dp)
-                .width(110.dp)
+                .width(140.dp)
                 .padding(start = 4.dp)
 
         ) {
-            Text(text = "ALL")
+            Text(text = textButton)
             if (!optionsList) {
                 KeyboardArrowDown()
             } else {
@@ -182,10 +187,9 @@ fun ButtonTheme(modifier: Modifier) {
     }
 }
 
-
 @Composable
-fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
-    var text by rememberSaveable { mutableStateOf("") }
+fun ButtonAdd() {
+    var textOfNote by remember { mutableStateOf("") }
 
     val openDialog = remember {
         mutableStateOf(false)
@@ -193,7 +197,7 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
 
     Row(
         modifier = Modifier.fillMaxSize()
-            .padding(start = 1250.dp, top = 300.dp)
+            .padding(start = 1250.dp)
 
     )
     {
@@ -210,7 +214,10 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
 
     if (openDialog.value) {
         AlertDialog(
-            onDismissRequest = { openDialog.value = false },
+            onDismissRequest = {
+                openDialog.value = false
+                textOfNote=""
+                               },
             title = {
 
                 Row(
@@ -226,9 +233,10 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
                     horizontalArrangement = Arrangement.Center
                 ) {
                     OutlinedTextField(
-                        value = text,
+                        value = textOfNote,
+                        textStyle =  TextStyle(fontSize = 18.sp, fontStyle = FontStyle.Normal, color = MaterialTheme.colors.onBackground),
                         placeholder = { Text("Input your note...") },
-                        onValueChange = { text = it },
+                        onValueChange = { textOfNote = it },
                         modifier = Modifier.width(400.dp),
                         colors = if (!JetRedditThemeSettings.isInDarkTheme.value) {
                             TextFieldDefaults.outlinedTextFieldColors(
@@ -247,7 +255,8 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
 
             dismissButton = {
                 Button(
-                    onClick = { openDialog.value = false },
+                    onClick = { openDialog.value = false
+                              textOfNote=""},
                     modifier = Modifier.padding(end = 220.dp, top = 100.dp)
 
                 ) {
@@ -258,8 +267,8 @@ fun ButtonAdd(onApplyButtonClick: (String) -> Unit) {
             confirmButton = {
                 Button(
                     onClick = {
-                        NoteRepository.addNote(Notes(text, checkbox = false))
-                        onApplyButtonClick(text)
+                        NoteRepository.addNote(Notes(textOfNote, checkbox = false))
+                        textOfNote=""
                         openDialog.value = false
                     },
                     modifier = Modifier.padding(end = 82.dp, top = 100.dp)
@@ -306,17 +315,17 @@ fun KeyBoardArrowUp() {
 
 @Composable
 fun IconEdit() {
-    AsyncImage(
-        load = { loadImageBitmap(File("src/main/resources/edit.png")) },
-        painterFor = { remember { BitmapPainter(it) } },
-        contentDescription = "edit",
+    Icon(
+        imageVector = Icons.Outlined.Edit,
+        contentDescription = null,
+        tint = MaterialTheme.colors.onBackground,
     )
 }
 
 @Composable
-fun ButtonEdit(index: Int) {
+fun ButtonEdit(textNote: String, uuid: String) {
 
-    var text by rememberSaveable { mutableStateOf("") }
+    var text by rememberSaveable { mutableStateOf(textNote) }
     val openDialog = remember {
         mutableStateOf(false)
     }
@@ -344,26 +353,20 @@ fun ButtonEdit(index: Int) {
 
             },
             text = {
+
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
                     OutlinedTextField(
                         value = text,
+                        textStyle =  TextStyle(fontSize = 18.sp, fontStyle = FontStyle.Normal, color = MaterialTheme.colors.onBackground),
                         onValueChange = { text = it },
                         modifier = Modifier.width(400.dp),
-                        colors = if (!JetRedditThemeSettings.isInDarkTheme.value) {
-                            TextFieldDefaults.outlinedTextFieldColors(
+                        colors =  TextFieldDefaults.outlinedTextFieldColors(
                                 focusedBorderColor = MaterialTheme.colors.primary,
                                 unfocusedBorderColor = MaterialTheme.colors.primary,
                             )
-                        } else {
-                            TextFieldDefaults.outlinedTextFieldColors(
-                                focusedBorderColor = MaterialTheme.colors.onPrimary,
-                                unfocusedBorderColor = MaterialTheme.colors.onPrimary,
-                            )
-                        }
-
                     )
                 }
             },
@@ -381,7 +384,7 @@ fun ButtonEdit(index: Int) {
             confirmButton = {
                 Button(
                     onClick = {
-                        NoteRepository.editNote(index, text)
+                        NoteRepository.editNote(uuid, text)
                         openDialog.value = false
 
                     },
@@ -396,17 +399,17 @@ fun ButtonEdit(index: Int) {
 
 @Composable
 fun IconDelete() {
-    AsyncImage(
-        load = { loadImageBitmap(File("src/main/resources/delete.png")) },
-        painterFor = { remember { BitmapPainter(it) } },
-        contentDescription = "Delete",
+    Icon(
+        imageVector = Icons.Outlined.Delete,
+        contentDescription = null,
+        tint = MaterialTheme.colors.onBackground,
     )
 }
 
 @Composable
-fun ButtonDelete(textNote: String, index: Int) {
+fun ButtonDelete(uuid: String) {
     IconButton(onClick = {
-        NoteRepository.deleteNote(textNote, index)
+        NoteRepository.deleteNote(uuid)
 
     }) {
         IconDelete()
@@ -420,22 +423,25 @@ fun ImageEmpty() {
         painterFor = { remember { BitmapPainter(it) } },
         contentDescription = "Sample",
         modifier = Modifier
-            .height(300.dp)
+            .height(265.dp)
             .fillMaxSize()
             .padding(top = 35.dp)
     )
 }
 
 @Composable
-fun CreateNote(note: Notes, index: Int) {
+fun CreateNote(note: Notes) {
 
-    Row(verticalAlignment = Alignment.CenterVertically,
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.padding(top = 10.dp)
+
     ) {
 
         Checkbox(
             checked = note.checkbox,
-            onCheckedChange = {
-                NoteRepository.editCheckBox(index,it )
+            onCheckedChange = { isChecked ->
+                NoteRepository.editCheckBox(note.myUuid, isChecked)
             },
         )
         if (note.checkbox) {
@@ -448,43 +454,28 @@ fun CreateNote(note: Notes, index: Int) {
         } else {
             Text("${note.text} ", color = MaterialTheme.colors.onBackground, fontWeight = FontWeight.SemiBold)
         }
-        ButtonEdit(index)
-        ButtonDelete(note.text, index)
+        ButtonEdit(note.text, note.myUuid)
+        ButtonDelete(note.myUuid)
     }
-}
-
-@Composable
-fun CreateEditNote(note: Notes, index: Int) {
-    val checked = remember { mutableStateOf(false) }
-    Row() {
-
-        Checkbox(
-            checked = checked.value,
-            onCheckedChange = { isChecked -> checked.value = isChecked },
-        )
-        if (checked.value) {
-            Text("${note.text} ", textDecoration = TextDecoration.LineThrough,)
-        } else {
-            Text("${note.text} ")
-        }
-
-        ButtonEdit(index)
-        ButtonDelete(note.text, index)
-
-    }
+    Divider(
+        startIndent = 0.dp,
+        thickness = 1.dp,
+        color = MaterialTheme.colors.primary,
+        modifier = Modifier.fillMaxWidth(0.4f)
+    )
 }
 
 @Composable
 fun AddNote(notes: List<Notes>) {
     LazyColumn(
-        modifier = Modifier.fillMaxWidth(),
-             horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth()
+            .heightIn(300.dp, max = 715.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     )
     {
         items(notes.size) {
-            CreateNote(notes[it], it)
+            CreateNote(notes[it])
         }
-
     }
 }
 
@@ -509,7 +500,7 @@ fun MainScreen() {
             } else {
                 AddNote(notes.value)
             }
-            ButtonAdd {}
+            ButtonAdd ()
         }
     }
 }
@@ -517,8 +508,11 @@ fun MainScreen() {
 fun main() = application {
     Window(
         onCloseRequest = ::exitApplication, state = WindowState(
-            size = DpSize(1920.dp, 1080.dp)
-        )
+            size = DpSize(1920.dp, 1080.dp),
+
+        ),
+        title = "TO-DO-LIST"
+
     ) {
         MainScreen()
     }
