@@ -196,7 +196,7 @@ fun ButtonAdd() {
     }
 
     Row(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier.fillMaxWidth()
             .padding(start = 1250.dp)
 
     )
