@@ -1,6 +1,5 @@
 package vistas
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -200,8 +199,9 @@ fun ButtonAdd() {
     }
 
     Row(
+        horizontalArrangement = Arrangement.Center,
         modifier = Modifier.fillMaxWidth()
-            .padding(start = 1250.dp)
+            .padding(start = 650.dp)
 
     )
     {
