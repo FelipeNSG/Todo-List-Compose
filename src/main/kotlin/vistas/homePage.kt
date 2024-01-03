@@ -186,6 +186,10 @@ fun ButtonTheme(modifier: Modifier) {
         }
     }
 }
+@Composable
+fun Bottom(){
+    Row(modifier = Modifier.fillMaxSize()){}
+}
 
 @Composable
 fun ButtonAdd() {
@@ -469,7 +473,7 @@ fun CreateNote(note: Notes) {
 fun AddNote(notes: List<Notes>) {
     LazyColumn(
         modifier = Modifier.fillMaxWidth()
-            .heightIn(300.dp, max = 715.dp),
+            .height(300.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     )
     {
@@ -480,7 +484,6 @@ fun AddNote(notes: List<Notes>) {
 }
 
 //Logic Code
-@Preview
 @Composable
 fun MainScreen() {
 
@@ -501,6 +504,7 @@ fun MainScreen() {
                 AddNote(notes.value)
             }
             ButtonAdd ()
+            Bottom()
         }
     }
 }
@@ -509,6 +513,7 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication, state = WindowState(
             size = DpSize(1920.dp, 1080.dp),
+
 
         ),
         title = "TO-DO-LIST"
