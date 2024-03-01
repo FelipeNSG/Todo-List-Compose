@@ -69,8 +69,6 @@ fun TitleEmpty() {
 
 @Composable
 fun SearchBar() {
-
-
     var optionsList by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.Center,
@@ -82,12 +80,14 @@ fun SearchBar() {
         var textButton by rememberSaveable { mutableStateOf("ALL") }
         var text by rememberSaveable { mutableStateOf("") }
         OutlinedTextField(
+            textStyle =  TextStyle(fontSize = 18.sp, fontStyle = FontStyle.Normal, color = MaterialTheme.colors.onBackground),
             value = text,
             onValueChange = {
                 text = it
                 NoteRepository.performSearch(it)
             },
             placeholder = { Text(text = "Search note...") },
+            singleLine = true,
             trailingIcon = { Lens() },
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.width(700.dp),
@@ -216,6 +216,8 @@ fun ButtonAdd() {
         }
     }
 
+
+
     if (openDialog.value) {
         AlertDialog(
             onDismissRequest = {
@@ -240,6 +242,7 @@ fun ButtonAdd() {
                         value = textOfNote,
                         textStyle =  TextStyle(fontSize = 18.sp, fontStyle = FontStyle.Normal, color = MaterialTheme.colors.onBackground),
                         placeholder = { Text("Input your note...") },
+                        singleLine = true,
                         onValueChange = { textOfNote = it },
                         modifier = Modifier.width(400.dp),
                         colors = if (!JetRedditThemeSettings.isInDarkTheme.value) {
@@ -513,8 +516,6 @@ fun main() = application {
     Window(
         onCloseRequest = ::exitApplication, state = WindowState(
             size = DpSize(1920.dp, 1080.dp),
-
-
         ),
         title = "TO-DO-LIST"
 
